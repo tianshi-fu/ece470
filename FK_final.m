@@ -1,0 +1,43 @@
+function [A, QUA] = FK_final(theta)
+%FK Calculation
+M =[1 0 0 -0.192; 0 1 0 0; 0 0 1 0.692; 0 0 0 1];
+q1 = [0.00012;0.000086;0.1475];
+q2 = [-0.1115;0.000054;0.1519];
+q3 = [-0.1115;0.000013;0.3955];
+q4 = [-0.1115;0.000085;0.6088];
+q5 = [-0.1122;0.000085;0.693];
+q6 = [-0.1115;0.000085;0.6941];
+a1 = [0;0;1];
+a2 = [-1;0;0];
+a3 = [-1;0;0];
+a4 = [-1;0;0];
+a5 = [0;0;1];
+a6 = [-1;0;0];
+S1 = [a1;-ss31(a1)*q1];
+S2 = [a2;-ss31(a2)*q2];
+S3 = [a3;-ss31(a3)*q3];
+S4 = [a4;-ss31(a4)*q4];
+S5 = [a5;-ss31(a5)*q5];
+S6 = [a6;-ss31(a6)*q6];
+ssV1 = ssV(S1,theta(1));
+ssV2 = ssV(S2,theta(2));
+ssV3 = ssV(S3,theta(3));
+ssV4 = ssV(S4,theta(4));
+ssV5 = ssV(S5,theta(5));
+ssV6 = ssV(S6,theta(6));
+T = expm(ssV1)*expm(ssV2)*expm(ssV3)*expm(ssV4)*expm(ssV5)*expm(ssV6)*M;
+P = T(1:3,4); %position of end effector
+A(:,1) = P;
+R = T(1:3,1:3);
+ssw = logm(R);
+w = [ssw(6);-ssw(3);ssw(2)];
+a = w/norm(w);
+Theta = norm(w);
+qua0 = cos(Theta/2);
+Q = a*sin(Theta/2);
+qua1 = Q(1);
+qua2 = Q(2);
+qua3 = Q(3);
+QUA=[qua1 qua2 qua3 qua0]; %orientation using quaternions
+
+end
